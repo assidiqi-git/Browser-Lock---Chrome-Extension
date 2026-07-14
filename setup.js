@@ -28,7 +28,13 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     document.getElementById('confirm-password').value = '';
     
     setTimeout(() => {
-      window.close();
+      chrome.tabs.query({ currentWindow: true }, (tabs) => {
+        if (tabs.length === 1) {
+          chrome.tabs.update(null, { url: 'chrome://newtab/' });
+        } else {
+          window.close();
+        }
+      });
     }, 2000);
   } catch (err) {
     showStatus('An error occurred. Please try again.', 'error');
