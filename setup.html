@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Setup Browser Lock</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #666;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+      outline: none;
+    }
+    input[type="password"]:focus {
+      border-color: #28a745;
+      box-shadow: 0 0 0 0.2rem rgba(40,167,69,.25);
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .error {
+      color: #dc3545;
+    }
+    .success {
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to Browser Lock</h2>
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Please set your master password to enable the lock.</p>
+    <div class="form-group">
+      <label for="new-password">New Password</label>
+      <input type="password" id="new-password" />
+    </div>
+    <div class="form-group">
+      <label for="confirm-password">Confirm Password</label>
+      <input type="password" id="confirm-password" />
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-top: -5px; margin-bottom: 20px;">
+      <input type="checkbox" id="show-password" style="width: auto; margin-right: 8px; cursor: pointer;" />
+      <label for="show-password" style="margin-bottom: 0; cursor: pointer; font-size: 14px;">Show password</label>
+    </div>
+    <button id="save-btn">Set Password</button>
+    <div id="status"></div>
+  </div>
+  <script src="setup.js"></script>
+</body>
+</html>
