@@ -62,6 +62,7 @@ function showOverlay() {
   input.type = 'password';
   input.id = 'browser-lock-password-12345';
   input.placeholder = 'Password';
+  input.autofocus = true;
   
   const button = document.createElement('button');
   button.id = 'browser-lock-submit-12345';
