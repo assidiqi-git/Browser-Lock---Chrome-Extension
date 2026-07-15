@@ -98,5 +98,15 @@ addUrlBtn.addEventListener('click', async () => {
   renderUrls();
 });
 
-// Initialize URL list on load
+// Initialize URL list and settings on load
 renderUrls();
+
+const closeOtherTabsCheckbox = document.getElementById('close-other-tabs');
+if (closeOtherTabsCheckbox) {
+  chrome.storage.local.get(['closeOtherTabsOnUnlock']).then((data) => {
+    closeOtherTabsCheckbox.checked = data.closeOtherTabsOnUnlock || false;
+  });
+  closeOtherTabsCheckbox.addEventListener('change', async (e) => {
+    await chrome.storage.local.set({ closeOtherTabsOnUnlock: e.target.checked });
+  });
+}

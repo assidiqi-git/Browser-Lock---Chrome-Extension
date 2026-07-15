@@ -91,22 +91,29 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     if (wasLocked && isNowUnlocked) {
       const sessionData = await chrome.storage.session.get(['hasOpenedStartupTabs']);
       if (!sessionData.hasOpenedStartupTabs) {
-        const localData = await chrome.storage.local.get(['autoOpenUrls']);
+        const localData = await chrome.storage.local.get(['autoOpenUrls', 'closeOtherTabsOnUnlock']);
         const urls = localData.autoOpenUrls || [];
         
         if (urls.length > 0) {
-          // Get the current active tab to find its index
-          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            const currentTabIndex = (tabs && tabs.length > 0) ? tabs[0].index : 0;
+          const closeOther = localData.closeOtherTabsOnUnlock;
+          
+          chrome.tabs.query({ currentWindow: true }, async (tabs) => {
+            const activeTab = tabs.find(t => t.active);
+            const currentTabIndex = activeTab ? activeTab.index : 0;
+            const existingTabIds = tabs.map(t => t.id);
             
-            // Open each URL in a new tab, positioned to the left of the active tab
-            urls.forEach((url, i) => {
-              chrome.tabs.create({ 
-                url, 
-                active: false,
+            // Open each URL in a new tab
+            for (let i = 0; i < urls.length; i++) {
+               await chrome.tabs.create({ 
+                url: urls[i], 
+                active: i === urls.length - 1,
                 index: Math.max(0, currentTabIndex + i)
               });
-            });
+            }
+
+            if (closeOther) {
+              chrome.tabs.remove(existingTabIds);
+            }
           });
         }
         

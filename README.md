@@ -6,8 +6,11 @@ Browser Lock adalah ekstensi Google Chrome (Manifest V3) yang dirancang untuk me
 
 - **Penguncian Startup Otomatis**: Menampilkan lapisan layar (overlay) yang meminta password setiap kali Google Chrome dibuka atau tab baru dibuat.
 - **Auto-Open URLs**: Setelah browser berhasil dibuka (*unlocked*), ekstensi akan secara otomatis membuka daftar URL/website yang sudah Anda atur sebelumnya ke dalam tab-tab baru.
+- **Tutup Tab Lain Otomatis**: Terdapat opsi (*toggle*) opsional untuk menutup semua tab yang sedang terbuka dan hanya menyisakan tab dari fitur *Auto-Open URLs* ketika browser berhasil dibuka.
+- **Fokus Tab Otomatis**: Setelah tab *Auto-Open URLs* terbuka, ekstensi akan secara otomatis memfokuskan layar ke tab terakhir yang baru dibuat.
+- **Mencegah Tab Baru Saat Terkunci**: Saat *lock screen* sedang aktif, ekstensi akan secara otomatis memblokir/menutup tab baru yang tidak sengaja atau sengaja dibuat dan memfokuskan kembali ke halaman layar kunci.
 - **Anti-Inspect & Anti-Bypass**: Secara otomatis memblokir fungsi Klik Kanan (Context Menu) dan semua tombol *shortcut* Developer Tools (seperti F12, Ctrl+Shift+I, Ctrl+U) saat layar terkunci, sehingga layar kunci tidak bisa diretas menggunakan *Inspect Element*.
-- **Pengaturan Modern**: Fitur ganti password dan kelola daftar *Auto-Open URLs* yang dapat diakses melalui *Popup* UI yang elegan di *toolbar*.
+- **Pengaturan Modern**: Fitur ganti password, kelola daftar *Auto-Open URLs*, beserta opsi tambahannya yang dapat diakses melalui *Popup* UI yang elegan di *toolbar*.
 
 ## 📸 Tangkapan Layar (Screenshots)
 
