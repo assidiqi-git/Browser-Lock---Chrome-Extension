@@ -28,23 +28,47 @@ async function checkAndRedirect(tabId, url) {
   
   const data = await chrome.storage.local.get(['isLocked', 'password']);
   if (data.password && data.isLocked !== false) {
-    const lockUrl = chrome.runtime.getURL(`lock.html?redirect=${encodeURIComponent(url)}`);
-    chrome.tabs.update(tabId, { url: lockUrl });
+    const sessionData = await chrome.storage.session.get(['firstLockTabId']);
+    
+    if (!sessionData.firstLockTabId) {
+      await chrome.storage.session.set({ firstLockTabId: tabId });
+      const lockUrl = chrome.runtime.getURL(`lock.html?redirect=${encodeURIComponent(url)}`);
+      chrome.tabs.update(tabId, { url: lockUrl });
+    } else if (sessionData.firstLockTabId !== tabId) {
+      // Fokuskan kembali ke tab pertama dan tutup tab yang baru
+      chrome.tabs.update(sessionData.firstLockTabId, { active: true });
+      chrome.tabs.remove(tabId);
+    }
   }
 }
+
+// Reset session jika tab lock pertama tidak sengaja ditutup
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  const sessionData = await chrome.storage.session.get(['firstLockTabId']);
+  if (sessionData.firstLockTabId === tabId) {
+    await chrome.storage.session.remove('firstLockTabId');
+  }
+});
 
 function lockChromeTabs() {
   chrome.tabs.query({}, async (tabs) => {
     const data = await chrome.storage.local.get(['password']);
     if (!data.password) return;
     
-    tabs.forEach(tab => {
+    const sessionData = await chrome.storage.session.get(['firstLockTabId']);
+    let firstLockId = sessionData.firstLockTabId;
+    
+    for (const tab of tabs) {
       const url = tab.pendingUrl || tab.url;
       if (url && url.startsWith('chrome://')) {
+        if (!firstLockId) {
+          firstLockId = tab.id;
+          await chrome.storage.session.set({ firstLockTabId: tab.id });
+        }
         const lockUrl = chrome.runtime.getURL(`lock.html?redirect=${encodeURIComponent(url)}`);
         chrome.tabs.update(tab.id, { url: lockUrl });
       }
-    });
+    }
   });
 }
 
