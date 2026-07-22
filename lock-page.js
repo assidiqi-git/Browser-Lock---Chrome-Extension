@@ -37,19 +37,29 @@ async function verifyPassword() {
   if (!actualPassword) return;
 
   if (passwordEntered === actualPassword) {
-    await chrome.storage.local.set({ isLocked: false });
+    const sessionData = await chrome.storage.session.get(['isManualLock']);
 
-    // Redirect kembali ke URL asal
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect') || 'chrome://newtab/';
+    if (sessionData.isManualLock) {
+      // Manual Lock: kirim sinyal ke background
+      chrome.runtime.sendMessage({ action: 'MANUAL_UNLOCK' }, () => {
+        chrome.runtime.lastError;
+      });
+    } else {
+      // Startup Lock: alur normal
+      await chrome.storage.local.set({ isLocked: false });
 
-    chrome.tabs.getCurrent((tab) => {
-      if (tab && tab.id) {
-        chrome.tabs.update(tab.id, { url: redirectUrl });
-      } else {
-        window.location.href = redirectUrl;
-      }
-    });
+      // Redirect kembali ke URL asal
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect') || 'chrome://newtab/';
+
+      chrome.tabs.getCurrent((tab) => {
+        if (tab && tab.id) {
+          chrome.tabs.update(tab.id, { url: redirectUrl });
+        } else {
+          window.location.href = redirectUrl;
+        }
+      });
+    }
   } else {
     errorEl.style.display = 'block';
     inputEl.value = '';

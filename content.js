@@ -19,13 +19,13 @@ function preventInspectElement(e) {
     e.preventDefault();
     return false;
   }
-  
+
   // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
   if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
     e.preventDefault();
     return false;
   }
-  
+
   // Ctrl+U (View Source)
   if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
     e.preventDefault();
@@ -48,39 +48,39 @@ function showOverlay() {
 
   overlayElement = document.createElement('div');
   overlayElement.id = 'browser-lock-overlay-12345';
-  
+
   const container = document.createElement('div');
   container.id = 'browser-lock-container-12345';
-  
+
   const h2 = document.createElement('h2');
   h2.textContent = 'Browser Locked';
-  
+
   const p1 = document.createElement('p');
   p1.textContent = 'Please enter your password to continue.';
-  
+
   const input = document.createElement('input');
   input.type = 'password';
   input.id = 'browser-lock-password-12345';
   input.placeholder = 'Password';
   input.autofocus = true;
-  
+
   const button = document.createElement('button');
   button.id = 'browser-lock-submit-12345';
   button.textContent = 'Unlock';
-  
+
   const errorP = document.createElement('p');
   errorP.id = 'browser-lock-error-12345';
   errorP.style.display = 'none';
   errorP.style.color = '#ff4d4f';
   errorP.style.marginTop = '10px';
   errorP.textContent = 'Incorrect password';
-  
+
   container.appendChild(h2);
   container.appendChild(p1);
   container.appendChild(input);
   container.appendChild(button);
   container.appendChild(errorP);
-  
+
   overlayElement.appendChild(container);
   if (document.documentElement) {
     document.documentElement.appendChild(overlayElement);
@@ -90,7 +90,7 @@ function showOverlay() {
       document.documentElement.appendChild(overlayElement);
     });
   }
-  
+
   document.getElementById('browser-lock-submit-12345').addEventListener('click', verifyPassword);
   document.getElementById('browser-lock-password-12345').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -161,14 +161,14 @@ function removeOverlay() {
   if (overlay) {
     overlay.remove();
   }
-  
+
   disableLockProtections();
-  
+
   // If we are on the dedicated lock page, redirect back to the original URL
   if (window.location.protocol === 'chrome-extension:' && window.location.pathname.endsWith('lock.html')) {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get('redirect') || 'chrome://newtab/';
-    
+
     if (chrome.tabs && chrome.tabs.getCurrent) {
       chrome.tabs.getCurrent((tab) => {
         if (tab && tab.id) {
@@ -190,7 +190,7 @@ async function verifyPassword() {
 
   const localData = await chrome.storage.local.get(['password']);
   const actualPassword = localData.password;
-  
+
   if (!actualPassword) return;
 
   if (passwordEntered === actualPassword) {

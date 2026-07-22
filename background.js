@@ -3,6 +3,9 @@
 // celah waktu di mana dua handler memproses tab yang sama.
 const processingTabIds = new Set();
 
+// Izinkan content script untuk membaca/menulis ke chrome.storage.session
+chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });
+
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
     const data = await chrome.storage.local.get(['password']);
@@ -174,15 +177,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Set isLocked agar content.js di tab lain juga tahu browser terkunci
       await chrome.storage.local.set({ isLocked: true });
 
-      // Broadcast ke semua tab: tampilkan overlay (via content.js)
       const tabs = await chrome.tabs.query({});
+      let restrictedTabsData = {};
+
       for (const tab of tabs) {
-        chrome.tabs.sendMessage(
-          tab.id,
-          { action: 'SHOW_MANUAL_LOCK_OVERLAY' },
-          () => { chrome.runtime.lastError; } // abaikan tab yang tidak punya content script
-        );
+        const url = tab.pendingUrl || tab.url;
+        if (!url) continue;
+
+        // Logika Hibrida: Overlay vs Redirect
+        if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
+          // Tab dengan URL internal Chrome: Simpan URL asli & redirect
+          restrictedTabsData[tab.id] = url;
+          const lockUrl = chrome.runtime.getURL(`lock.html?redirect=${encodeURIComponent(url)}`);
+          chrome.tabs.update(tab.id, { url: lockUrl });
+        } else {
+          // Halaman web normal: Injeksi overlay lock
+          chrome.tabs.sendMessage(
+            tab.id,
+            { action: 'SHOW_MANUAL_LOCK_OVERLAY' },
+            () => { chrome.runtime.lastError; } // abaikan tab yang tidak punya content script
+          );
+        }
       }
+      
+      // Simpan data URL asli untuk digunakan saat unlock
+      await chrome.storage.session.set({ restrictedTabsData });
 
       sendResponse({ success: true });
     })();
@@ -191,9 +210,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === 'MANUAL_UNLOCK') {
     (async () => {
+      // 1. Set flag isLocked false
       await chrome.storage.local.set({ isLocked: false });
-      await chrome.storage.session.set({ isManualLock: false });
-      // Broadcast ke semua tab: hapus overlay
+      // Flag isManualLock tidak dihapus di sini, melainkan dibiarkan
+      // agar auto-open URL handler mengeceknya, lalu auto-open URL handler 
+      // yang akan menghapus isManualLock menjadi false.
+      // Aturannya: "Setelah proses unlock selesai, kembalikan flag isManualLock menjadi false"
+      // Wait, let's just clear it after small delay or let the auto open logic clear it.
+      // Auto-open logic in background.js explicitly clears it!
+      
+      // 2. Broadcast ke seluruh tab normal untuk menghapus DOM overlay
       const tabs = await chrome.tabs.query({});
       for (const tab of tabs) {
         chrome.tabs.sendMessage(
@@ -202,6 +228,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           () => { chrome.runtime.lastError; }
         );
       }
+
+      // 3. Mengembalikan (redirect balik) tab chrome:// ke URL asli
+      const sessionData = await chrome.storage.session.get(['restrictedTabsData']);
+      if (sessionData.restrictedTabsData) {
+        for (const [tabIdStr, originalUrl] of Object.entries(sessionData.restrictedTabsData)) {
+          const tabId = parseInt(tabIdStr, 10);
+          chrome.tabs.update(tabId, { url: originalUrl }, () => { chrome.runtime.lastError; });
+        }
+        await chrome.storage.session.remove('restrictedTabsData');
+      }
+
       sendResponse({ success: true });
     })();
     return true;
