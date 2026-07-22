@@ -89,6 +89,44 @@ async function init() {
     pwdInput.focus();
   }
 
+  // === Focus Trap ===
+  // Cegah fokus berpindah dari input password saat user klik atau aktivitas apapun.
+
+  // 1. Tangkap mousedown di seluruh dokumen.
+  //    preventDefault pada mousedown mencegah browser memindahkan fokus,
+  //    tapi mouseup/click tetap jalan sehingga tombol Unlock masih bisa diklik.
+  document.addEventListener('mousedown', (e) => {
+    const pwdInput = document.getElementById('browser-lock-password-12345');
+    const submitBtn = document.getElementById('browser-lock-submit-12345');
+    if (e.target !== pwdInput && e.target !== submitBtn) {
+      e.preventDefault();
+      pwdInput.focus();
+    }
+  });
+
+  // 2. Cegah Tab & Shift+Tab memindahkan fokus keluar dari input
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const pwdInput = document.getElementById('browser-lock-password-12345');
+      if (pwdInput) pwdInput.focus();
+    }
+  });
+
+  // 3. Fallback: jika fokus tetap berpindah (edge case), langsung kembalikan
+  const pwdInputEl = document.getElementById('browser-lock-password-12345');
+  if (pwdInputEl) {
+    pwdInputEl.addEventListener('blur', () => {
+      // Delay kecil agar blur dari klik tombol Unlock tidak di-cancel
+      setTimeout(() => {
+        const el = document.getElementById('browser-lock-password-12345');
+        if (el && document.activeElement !== el) {
+          el.focus();
+        }
+      }, 10);
+    });
+  }
+
   // Kembalikan fokus ke input saat user balik ke tab ini
   window.addEventListener('focus', () => {
     const pwdInput = document.getElementById('browser-lock-password-12345');
