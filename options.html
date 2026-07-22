@@ -1,164 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>Browser Lock Options</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #ffffff;
-      margin: 0;
-      width: 320px;
-    }
-    .container {
-      padding: 20px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    h2 {
-      margin-top: 0;
-      color: #333;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      color: #666;
-    }
-    input[type="password"] {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      box-sizing: border-box;
-      outline: none;
-    }
-    input[type="password"]:focus {
-      border-color: #28a745;
-      box-shadow: 0 0 0 0.2rem rgba(40,167,69,.25);
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    #status {
-      margin-top: 15px;
-      font-size: 14px;
-      text-align: center;
-    }
-    .success {
-      color: #28a745;
-    }
-    .error {
-      color: #dc3545;
-    }
-    .url-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .url-group input {
-      flex: 1;
-    }
-    .url-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      text-align: left;
-    }
-    .url-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px;
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin-bottom: 8px;
-      font-size: 14px;
-      word-break: break-all;
-    }
-    .url-list button {
-      width: auto;
-      padding: 5px 10px;
-      background-color: #dc3545;
-      font-size: 12px;
-      margin-left: 10px;
-    }
-    .url-list button:hover {
-      background-color: #c82333;
-    }
-    hr {
-      border: 0;
-      border-top: 1px solid #eee;
-      margin: 20px 0;
-    }
-    #manual-lock-btn {
-      background-color: #dc3545;
-    }
-    #manual-lock-btn:hover {
-      background-color: #c82333;
-    }
-    #lock-status {
-      margin-top: 10px;
-      font-size: 13px;
-      text-align: center;
-      color: #28a745;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Change Password</h2>
-    <div class="form-group">
-      <label for="current-password">Current Password</label>
-      <input type="password" id="current-password" />
-    </div>
-    <div class="form-group">
-      <label for="new-password">New Password</label>
-      <input type="password" id="new-password" />
-    </div>
-    <div class="form-group">
-      <label for="confirm-password">Confirm New Password</label>
-      <input type="password" id="confirm-password" />
-    </div>
-    <button id="save-btn">Update Password</button>
-    <div id="status"></div>
-    
-    <hr>
-    
-    <h2>Auto-Open URLs</h2>
-    <p style="font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px;">Opens automatically upon first unlock</p>
-    
-    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 15px;">
-      <input type="checkbox" id="close-other-tabs" style="width: auto; margin: 0 10px 0 0; cursor: pointer;">
-      <label for="close-other-tabs" style="margin-bottom: 0; cursor: pointer; font-size: 14px;">Close other tabs when opening</label>
-    </div>
+  <head>
+    <title>Browser Lock Options</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        width: 320px;
+      }
+      .container {
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      h2 {
+        margin-top: 0;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #666;
+      }
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+        outline: none;
+      }
+      input[type="password"]:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+      #status {
+        margin-top: 15px;
+        font-size: 14px;
+        text-align: center;
+      }
+      .success {
+        color: #28a745;
+      }
+      .error {
+        color: #dc3545;
+      }
+      .url-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .url-group input {
+        flex: 1;
+      }
+      .url-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+      }
+      .url-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        word-break: break-all;
+      }
+      .url-list button {
+        width: auto;
+        padding: 5px 10px;
+        background-color: #dc3545;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+      .url-list button:hover {
+        background-color: #c82333;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #eee;
+        margin: 20px 0;
+      }
+      #manual-lock-btn {
+        background-color: #dc3545;
+      }
+      #manual-lock-btn:hover {
+        background-color: #c82333;
+      }
+      #lock-status {
+        margin-top: 10px;
+        font-size: 13px;
+        text-align: center;
+        color: #28a745;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Manual Lock</h2>
+      <button id="manual-lock-btn">&#128274; Lock Now</button>
+      <div id="lock-status"></div>
 
-    <div class="url-group">
-      <input type="text" id="new-url" placeholder="https://example.com" />
-      <button id="add-url-btn" style="width: auto; padding: 10px 15px; background-color: #007bff;">Add</button>
+      <hr />
+
+      <h2>Change Password</h2>
+      <button id="open-change-password-btn">Change Password Settings</button>
+
+      <hr />
+
+      <h2>Auto-Open URLs</h2>
+      <p
+        style="
+          font-size: 12px;
+          color: #666;
+          margin-top: -10px;
+          margin-bottom: 15px;
+        "
+      >
+        Opens automatically upon first unlock
+      </p>
+
+      <div
+        class="form-group"
+        style="display: flex; align-items: center; margin-bottom: 15px"
+      >
+        <input
+          type="checkbox"
+          id="close-other-tabs"
+          style="width: auto; margin: 0 10px 0 0; cursor: pointer"
+        />
+        <label
+          for="close-other-tabs"
+          style="margin-bottom: 0; cursor: pointer; font-size: 14px"
+          >Close other tabs when opening</label
+        >
+      </div>
+
+      <div class="url-group">
+        <input type="text" id="new-url" placeholder="https://example.com" />
+        <button
+          id="add-url-btn"
+          style="width: auto; padding: 10px 15px; background-color: #007bff"
+        >
+          Add
+        </button>
+      </div>
+      <ul id="url-list" class="url-list"></ul>
     </div>
-    <ul id="url-list" class="url-list"></ul>
-
-    <hr>
-
-    <h2>Manual Lock</h2>
-    <p style="font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px;">Lock browser immediately without triggering auto-open URLs</p>
-    <button id="manual-lock-btn">&#128274; Lock Now</button>
-    <div id="lock-status"></div>
-  </div>
-  <script src="options.js"></script>
-</body>
+    <script src="options.js"></script>
+  </body>
 </html>
