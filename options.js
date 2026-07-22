@@ -110,3 +110,23 @@ if (closeOtherTabsCheckbox) {
     await chrome.storage.local.set({ closeOtherTabsOnUnlock: e.target.checked });
   });
 }
+
+// Manual Lock
+document.getElementById('manual-lock-btn').addEventListener('click', async () => {
+  const lockStatusDiv = document.getElementById('lock-status');
+  lockStatusDiv.textContent = '';
+
+  // Kirim pesan ke background.js untuk memicu Manual Lock
+  chrome.runtime.sendMessage({ action: 'MANUAL_LOCK' }, (response) => {
+    if (chrome.runtime.lastError) {
+      lockStatusDiv.style.color = '#dc3545';
+      lockStatusDiv.textContent = 'Failed to lock. Please try again.';
+      return;
+    }
+    if (response && response.success) {
+      lockStatusDiv.style.color = '#28a745';
+      lockStatusDiv.textContent = '✓ Browser locked successfully.';
+      setTimeout(() => { lockStatusDiv.textContent = ''; }, 3000);
+    }
+  });
+});

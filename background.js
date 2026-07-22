@@ -155,6 +155,60 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   checkAndRedirect(tabId, url, false);
 });
 
+// ─── Manual Lock ─────────────────────────────────────────────────────────────
+// Tangkap pesan MANUAL_LOCK dari options.js.
+// Bedanya dengan startup lock:
+//   - Overlay diinjeksi ke semua tab yang ada (TANPA redirect/re-create tab)
+//   - Flag isManualLock = true → saat unlock, auto-open URL TIDAK dijalankan
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'MANUAL_LOCK') {
+    (async () => {
+      const data = await chrome.storage.local.get(['password']);
+      if (!data.password) {
+        sendResponse({ success: false, reason: 'No password set' });
+        return;
+      }
+
+      // Tandai sebagai manual lock agar auto-open URL tidak terpicu saat unlock
+      await chrome.storage.session.set({ isManualLock: true });
+      // Set isLocked agar content.js di tab lain juga tahu browser terkunci
+      await chrome.storage.local.set({ isLocked: true });
+
+      // Broadcast ke semua tab: tampilkan overlay (via content.js)
+      const tabs = await chrome.tabs.query({});
+      for (const tab of tabs) {
+        chrome.tabs.sendMessage(
+          tab.id,
+          { action: 'SHOW_MANUAL_LOCK_OVERLAY' },
+          () => { chrome.runtime.lastError; } // abaikan tab yang tidak punya content script
+        );
+      }
+
+      sendResponse({ success: true });
+    })();
+    return true; // async response
+  }
+
+  if (message.action === 'MANUAL_UNLOCK') {
+    (async () => {
+      await chrome.storage.local.set({ isLocked: false });
+      await chrome.storage.session.set({ isManualLock: false });
+      // Broadcast ke semua tab: hapus overlay
+      const tabs = await chrome.tabs.query({});
+      for (const tab of tabs) {
+        chrome.tabs.sendMessage(
+          tab.id,
+          { action: 'REMOVE_MANUAL_LOCK_OVERLAY' },
+          () => { chrome.runtime.lastError; }
+        );
+      }
+      sendResponse({ success: true });
+    })();
+    return true;
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Auto-Open Startup Tabs Logic
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'local' && changes.isLocked) {
@@ -162,7 +216,15 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     const isNowUnlocked = changes.isLocked.newValue === false;
 
     if (wasLocked && isNowUnlocked) {
-      const sessionData = await chrome.storage.session.get(['hasOpenedStartupTabs']);
+      const sessionData = await chrome.storage.session.get(['hasOpenedStartupTabs', 'isManualLock']);
+
+      // Jika ini adalah Manual Lock unlock → JANGAN jalankan auto-open URL
+      // Cukup clear flag, overlay sudah dihapus oleh content.js
+      if (sessionData.isManualLock) {
+        await chrome.storage.session.set({ isManualLock: false });
+        return;
+      }
+
       if (!sessionData.hasOpenedStartupTabs) {
         const localData = await chrome.storage.local.get(['autoOpenUrls', 'closeOtherTabsOnUnlock']);
         const urls = localData.autoOpenUrls || [];

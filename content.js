@@ -191,11 +191,24 @@ async function verifyPassword() {
   const localData = await chrome.storage.local.get(['password']);
   const actualPassword = localData.password;
   
-  if (!actualPassword) return; // Should not happen if overlay is shown
+  if (!actualPassword) return;
 
   if (passwordEntered === actualPassword) {
-    await chrome.storage.local.set({ isLocked: false });
-    removeOverlay();
+    // Cek apakah ini Manual Lock mode
+    const sessionData = await chrome.storage.session.get(['isManualLock']);
+
+    if (sessionData.isManualLock) {
+      // Manual Lock: kirim ke background untuk broadcast hapus overlay ke semua tab
+      // Background TIDAK akan menjalankan auto-open URL
+      chrome.runtime.sendMessage({ action: 'MANUAL_UNLOCK' }, () => {
+        chrome.runtime.lastError;
+      });
+      removeOverlay();
+    } else {
+      // Startup Lock: alur normal
+      await chrome.storage.local.set({ isLocked: false });
+      removeOverlay();
+    }
   } else {
     errorEl.style.display = 'block';
     inputEl.value = '';
@@ -216,3 +229,19 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 });
+
+// ─── Manual Lock Message Listener ────────────────────────────────────────────
+// Tangkap pesan dari background.js untuk tampilkan/hapus overlay manual lock.
+// Overlay diinjeksi langsung ke halaman yang sedang aktif (tanpa redirect).
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'SHOW_MANUAL_LOCK_OVERLAY') {
+    showOverlay();
+    sendResponse({ success: true });
+  }
+
+  if (message.action === 'REMOVE_MANUAL_LOCK_OVERLAY') {
+    removeOverlay();
+    sendResponse({ success: true });
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────────

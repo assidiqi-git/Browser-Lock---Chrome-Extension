@@ -104,6 +104,18 @@
       border-top: 1px solid #eee;
       margin: 20px 0;
     }
+    #manual-lock-btn {
+      background-color: #dc3545;
+    }
+    #manual-lock-btn:hover {
+      background-color: #c82333;
+    }
+    #lock-status {
+      margin-top: 10px;
+      font-size: 13px;
+      text-align: center;
+      color: #28a745;
+    }
   </style>
 </head>
 <body>
@@ -139,6 +151,13 @@
       <button id="add-url-btn" style="width: auto; padding: 10px 15px; background-color: #007bff;">Add</button>
     </div>
     <ul id="url-list" class="url-list"></ul>
+
+    <hr>
+
+    <h2>Manual Lock</h2>
+    <p style="font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px;">Lock browser immediately without triggering auto-open URLs</p>
+    <button id="manual-lock-btn">&#128274; Lock Now</button>
+    <div id="lock-status"></div>
   </div>
   <script src="options.js"></script>
 </body>
