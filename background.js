@@ -66,7 +66,8 @@ async function checkAndRedirect(tabId, url, canRecreate = false) {
           chrome.tabs.create({ url: lockUrl, index: tabIndex, active: true }, (newTab) => {
             chrome.storage.session.set({ firstLockTabId: newTab.id });
             processingTabIds.delete(tabId);
-            chrome.tabs.remove(tabId);
+            // Hapus tab lama — abaikan jika tab sudah tidak ada
+            chrome.tabs.remove(tabId, () => { chrome.runtime.lastError; });
           });
         });
       } else {
@@ -79,8 +80,8 @@ async function checkAndRedirect(tabId, url, canRecreate = false) {
     } else if (sessionData.firstLockTabId !== tabId) {
       // Tab lain selain lock tab utama: fokuskan tab lock & tutup tab ini
       processingTabIds.delete(tabId);
-      chrome.tabs.update(sessionData.firstLockTabId, { active: true });
-      chrome.tabs.remove(tabId);
+      chrome.tabs.update(sessionData.firstLockTabId, { active: true }, () => { chrome.runtime.lastError; });
+      chrome.tabs.remove(tabId, () => { chrome.runtime.lastError; });
     } else {
       processingTabIds.delete(tabId);
     }
@@ -127,7 +128,8 @@ function lockChromeTabs() {
             firstLockId = newTab.id;
             chrome.storage.session.set({ firstLockTabId: newTab.id });
             processingTabIds.delete(tabId);
-            chrome.tabs.remove(tabId);
+            // Hapus tab lama — abaikan jika tab sudah tidak ada
+            chrome.tabs.remove(tabId, () => { chrome.runtime.lastError; });
             resolve();
           });
         });
