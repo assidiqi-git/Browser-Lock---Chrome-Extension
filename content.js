@@ -99,19 +99,61 @@ function showOverlay() {
   });
 
   enableLockProtections();
-  
+
+  const pwdInputId = 'browser-lock-password-12345';
+
   const focusInput = () => {
-    window.focus(); // Attempt to pull focus to the window document
-    const pwdInput = document.getElementById('browser-lock-password-12345');
-    if (pwdInput) {
-      pwdInput.focus();
-      pwdInput.click(); // Sometimes a programmatic click helps
+    const pwdInput = document.getElementById(pwdInputId);
+    if (pwdInput && document.activeElement !== pwdInput) {
+      pwdInput.focus({ preventScroll: true });
     }
   };
-  
-  focusInput();
-  setTimeout(focusInput, 50);
-  setTimeout(focusInput, 300);
+
+  // Polling aktif: setiap 50ms cek apakah fokus sudah di input password.
+  // Jika belum, paksa fokus kembali. Berjalan selama 5 detik sejak overlay muncul.
+  // Ini mengatasi Chrome yang mencuri fokus ke address bar setelah halaman load.
+  const startTime = Date.now();
+  const focusInterval = setInterval(() => {
+    const pwdInput = document.getElementById(pwdInputId);
+    if (!pwdInput) {
+      clearInterval(focusInterval);
+      return;
+    }
+    // Hanya paksa fokus jika window sedang aktif (document.hasFocus())
+    // dan fokus saat ini bukan di input password
+    if (document.hasFocus() && document.activeElement !== pwdInput) {
+      pwdInput.focus({ preventScroll: true });
+    }
+    // Berhenti polling setelah 5 detik
+    if (Date.now() - startTime > 5000) {
+      clearInterval(focusInterval);
+    }
+  }, 50);
+
+  // Setiap kali window mendapat fokus kembali (user klik tab ini),
+  // kembalikan fokus ke input password jika masih terkunci
+  const onWindowFocus = () => {
+    const pwdInput = document.getElementById(pwdInputId);
+    if (pwdInput) {
+      pwdInput.focus({ preventScroll: true });
+    } else {
+      window.removeEventListener('focus', onWindowFocus);
+    }
+  };
+  window.addEventListener('focus', onWindowFocus);
+
+  // Tangani saat tab menjadi aktif/visible kembali
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      const pwdInput = document.getElementById(pwdInputId);
+      if (pwdInput) {
+        setTimeout(() => pwdInput.focus({ preventScroll: true }), 100);
+      } else {
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      }
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
 }
 
 function removeOverlay() {

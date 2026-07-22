@@ -3,8 +3,28 @@
 <head>
   <title>Browser Locked</title>
   <link rel="stylesheet" href="style.css">
-  <script src="content.js"></script>
 </head>
 <body style="background-color: #1a1a1a;">
+
+  <!-- Overlay & form dibuat sebagai HTML statis agar autofocus diproses browser -->
+  <div id="browser-lock-overlay-12345">
+    <div id="browser-lock-container-12345">
+      <h2>Browser Locked</h2>
+      <p>Please enter your password to continue.</p>
+      <input
+        type="password"
+        id="browser-lock-password-12345"
+        placeholder="Password"
+        autofocus
+      >
+      <button id="browser-lock-submit-12345">Unlock</button>
+      <p id="browser-lock-error-12345" style="display:none; color:#ff4d4f; margin-top:10px;">
+        Incorrect password
+      </p>
+    </div>
+  </div>
+
+  <!-- Script di akhir body agar DOM sudah siap -->
+  <script src="lock-page.js"></script>
 </body>
 </html>
